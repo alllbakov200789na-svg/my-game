@@ -1,0 +1,29 @@
+PASS Luau 0.744 syntax compilation: 31 source files
+PASS T03 role counts for 15 players in all five modes
+PASS T04 eligible modes for 0..15 players
+PASS T05 1000 random compatible pairs
+PASS Role pity reset and increment
+PASS Every technique has real effect metadata
+PASS T11 Hunt distinct win conditions
+PASS T11 Clash leadership, score and simultaneous deaths
+PASS T11 Invasion, Survival and Betrayal
+PASS T10 disconnect snapshots do not leave an unwinnable state
+PASS T06 damage, friendly fire, protection, duplicate lethal hits
+PASS Balance and commerce defaults
+CORE TEST GROUPS PASSED: 11
+PASS T14 receipt atomicity and duplicate delivery
+PASS T14 ambiguous commit retry never grants twice
+PASS DataStore failure closes profile and prevents stale save
+PASS Foreign session cannot be overwritten
+PASS Studio rejects real purchase receipts
+PASS Remote token bucket limits bursts
+PASS T07 cooldown, role ownership, spectator and finite direction checks
+PASS T08 ultimate needs full charge and consumes it once
+PASS Round transitions reject duplicates and illegal edges
+BOUNDARY TEST GROUPS PASSED: 9
+PASS XML is well formed and all embedded script sources match disk
+PASS static map structure ShibuyaCity : 3 seals, 16 spawns, 22 destroyables
+PASS static map structure SorcererAcademy : 3 seals, 16 spawns, 15 destroyables
+PASS static map structure CursedDistrict : 3 seals, 16 spawns, 28 destroyables
+PASS exactly one ProcessReceipt assignment
+NOT RUN Roblox Engine, Studio Output, multi-client integration, live DataStore, live purchases, device emulation, performance

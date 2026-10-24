@@ -1,0 +1,78 @@
+{
+  "name": "JujutsuCursedSurvival",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "Shared": {
+        "$path": "src/Shared"
+      },
+      "SharedAssets": {
+        "$className": "Folder"
+      }
+    },
+    "ServerScriptService": {
+      "$path": "src/Server"
+    },
+    "ServerStorage": {
+      "Maps": {
+        "$path": "assets/Maps"
+      },
+      "ServerAssets": {
+        "$className": "Folder"
+      },
+      "NPCs": {
+        "$className": "Folder"
+      }
+    },
+    "StarterPlayer": {
+      "StarterPlayerScripts": {
+        "$path": "src/Client"
+      }
+    },
+    "Workspace": {
+      "$properties": {
+        "StreamingEnabled": false
+      },
+      "Lobby": {
+        "$path": "assets/Lobby.rbxmx"
+      },
+      "GameplayEffects": {
+        "$className": "Folder"
+      },
+      "SpawnPoints": {
+        "$className": "Folder"
+      }
+    },
+    "Lighting": {
+      "$properties": {
+        "ClockTime": 19.3,
+        "Brightness": 2.2,
+        "Ambient": [
+          0.368,
+          0.333,
+          0.529
+        ],
+        "OutdoorAmbient": [
+          0.392,
+          0.431,
+          0.58
+        ]
+      },
+      "AnimeBloom": {
+        "$className": "BloomEffect",
+        "$properties": {
+          "Intensity": 0.25,
+          "Size": 24,
+          "Threshold": 1.4
+        }
+      },
+      "AnimeGrade": {
+        "$className": "ColorCorrectionEffect",
+        "$properties": {
+          "Contrast": 0.12,
+          "Saturation": 0.13
+        }
+      }
+    }
+  }
+}
