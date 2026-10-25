@@ -8,6 +8,9 @@
       },
       "SharedAssets": {
         "$className": "Folder"
+      },
+      "Packages": {
+        "$path": "Packages"
       }
     },
     "ServerScriptService": {
