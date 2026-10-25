@@ -1,0 +1,20 @@
+﻿ M sourcemap.json
+ M src/Client/ClientBootstrap.client.lua
+ M src/Server/Services/AbilityService.lua
+ M src/Server/Services/AntiExploitService.lua
+ M src/Server/Services/CharacterService.lua
+ M src/Server/Services/DamageService.lua
+ M src/Server/Services/MapService.lua
+ M src/Server/Services/RoundService.lua
+ D test.rbxl.lock
+ M tests/boundaries.generated.lua
+ M tools/test-bundle.mjs
+ M tools/verify.ps1
+?? docs/ANTIEXPLOIT-VALIDATION.md
+?? docs/SPAWN-VALIDATION.md
+?? src/Server/Services/SpawnSafety.lua
+?? src/Server/Services/VerticalMotion.lua
+?? tests/movement.generated.lua
+?? tests/movement.spec.lua
+?? tests/spawn.studio.lua
+?? work/

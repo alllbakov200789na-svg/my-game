@@ -110,6 +110,7 @@ return S
 
 end)()
 local Guard=(function()
+local VerticalMotion=require("../src/Server/Services/VerticalMotion")
 local S={}
 function S:Init(ctx) self.C=ctx; self.Buckets={}; self.Log={}; self.Motion={}; self.Audit={} end
 function S:Flag(p,reason)
@@ -126,20 +127,75 @@ function S:Allow(p,channel,rate,burst)
  if b.Tokens<1 then self:Flag(p,"rate:"..channel); return false end
  b.Tokens=b.Tokens-1; return true
 end
-function S:Step(a,dt)
+function S:JumpSpeed(a)
+ local h=self.C.U.humanoid(a.Model)
+ if not h then return 50 end
+ return h.UseJumpPower and h.JumpPower or math.sqrt(2*math.max(0,workspace.Gravity)*h.JumpHeight)
+end
+function S:Grounded(a,root)
+ local h=self.C.U.humanoid(a.Model); if not h then return false end
+ local rp=RaycastParams.new(); rp.FilterType=Enum.RaycastFilterType.Exclude
+ rp.FilterDescendantsInstances={a.Model,workspace.GameplayEffects}; rp.RespectCanCollide=true
+ rp.CollisionGroup=root.CollisionGroup
+ local down=Vector3.new(0,-(h.HipHeight+root.Size.Y/2+1),0)
+ local x=root.Size.X/2; local z=root.Size.Z/2
+ -- Footprint probes also recognize a character standing at the edge of a ledge.
+ for _,offset in ipairs({Vector3.zero,Vector3.new(x,0,z),Vector3.new(-x,0,z),Vector3.new(x,0,-z),Vector3.new(-x,0,-z)}) do
+  local hit=workspace:Raycast(root.Position+offset,down,rp)
+  -- Current maps have static ground. Client-owned debris/characters cannot certify a landing.
+  if hit and (hit.Instance:IsA("Terrain") or hit.Instance.Anchored) then return true end
+ end
+ return false
+end
+-- Call only with a position computed by server gameplay code, immediately after teleport/spawn.
+function S:ResetMotion(a,pos)
+ if not a.Player then return end
+ local now=os.clock()
+ self.Motion[a.Player]={Model=a.Model,Pos=pos,SafePos=pos,At=now,
+  Vertical=VerticalMotion.new(pos.Y,now,self:JumpSpeed(a))}
+end
+-- Authorize the exact server-written impulse, not the client's AssemblyLinearVelocity.
+function S:AuthorizeImpulse(a,velocity,duration)
+ if not a.Player then return end
+ local old=self.Motion[a.Player]; if not old or old.Model~=a.Model then return end
+ local now=os.clock()
+ old.Vertical=VerticalMotion.new(old.Pos.Y,now,self:JumpSpeed(a),velocity.Y)
+ old.ImpulseUntil=now+duration
+ old.ImpulseSpeed=Vector3.new(velocity.X,0,velocity.Z).Magnitude
+end
+function S:Step(a,_dt)
  if not a.Player or not a.Alive then return end
  local root=self.C.U.root(a.Model); if not root then return end
  local now=os.clock(); local pos=root.Position
  if not self.C.U.vector(pos) then a.Alive=false; a.Model:Destroy(); return end
  local old=self.Motion[a.Player]
- if old and now>(a.MotionGrace or 0) then
-  local delta=Vector3.new(pos.X-old.Pos.X,0,pos.Z-old.Pos.Z).Magnitude
-  if delta>math.max(18,(a.Definition.SprintSpeed+12)*dt*2.5) then
-   root.CFrame=CFrame.new(old.Pos); root.AssemblyLinearVelocity=Vector3.zero
+ if not old or old.Model~=a.Model then self:ResetMotion(a,pos); return end
+ local dt=math.max(0,now-old.At)
+ local grounded=self:Grounded(a,root)
+ local delta=Vector3.new(pos.X-old.Pos.X,0,pos.Z-old.Pos.Z).Magnitude
+ local verticalOK,nextVertical=VerticalMotion.check(old.Vertical,pos.Y,now,grounded,
+  self:JumpSpeed(a),workspace.Gravity,a.Definition.SprintSpeed*2,delta)
+ do
+  local speed=a.Definition.SprintSpeed+12
+  if now<(old.ImpulseUntil or 0) then speed=math.max(speed,old.ImpulseSpeed) end
+  if delta>math.max(18,speed*dt*2.5) then
+   root.CFrame=CFrame.new(old.SafePos); root.AssemblyLinearVelocity=Vector3.zero
+   self:ResetMotion(a,old.SafePos)
    self:Flag(a.Player,"movement"); return
   end
  end
- self.Motion[a.Player]={Pos=pos}
+ if not verticalOK then
+  old.SuspectAt=old.SuspectAt or now; old.SuspectCount=(old.SuspectCount or 0)+1
+  -- Freeze the accepted baseline; a suspect position must not become the next allowance.
+  if old.SuspectCount>=3 and now-old.SuspectAt>=0.5 then
+   root.CFrame=CFrame.new(old.SafePos); root.AssemblyLinearVelocity=Vector3.zero
+   self:ResetMotion(a,old.SafePos); self:Flag(a.Player,"vertical movement")
+  end
+  return
+ end
+ old.Pos=pos; old.At=now; old.Vertical=nextVertical
+ old.SuspectAt=nil; old.SuspectCount=nil
+ if grounded then old.SafePos=pos end
 end
 function S:Remove(p)
  self.Motion[p]=nil
@@ -208,7 +264,10 @@ function S:Cast(p,id,direction)
   if def.Kind=="Pull" then
    for _,b in ipairs(C.CombatService:Targets(a,def.Range+def.Radius)) do
     local br=C.U.root(b.Model); local delta=center-br.Position
-    if delta.Magnitude<def.Radius and delta.Magnitude>1 and C.CombatService:Visible(center,b,{a.Model}) then br.AssemblyLinearVelocity=delta.Unit*48; b.MotionGrace=now+1 end
+    if delta.Magnitude<def.Radius and delta.Magnitude>1 and C.CombatService:Visible(center,b,{a.Model}) then
+     local velocity=delta.Unit*48; C.AntiExploitService:AuthorizeImpulse(b,velocity,1)
+     br.AssemblyLinearVelocity=velocity
+    end
    end
   end
   C.Remotes.Effect:FireAllClients("Burst",center,def.Color,def.Radius)
@@ -230,7 +289,8 @@ function S:Cast(p,id,direction)
   local pos=origin+flat*length; local ground=C.CombatService:Ray(pos+Vector3.new(0,3,0),Vector3.new(0,-16,0),{a.Model})
   if ground and math.abs(pos.X)<C.Config.ArenaRadius and math.abs(pos.Z)<C.Config.ArenaRadius then
    pos=Vector3.new(pos.X,ground.Position.Y+3.2,pos.Z)
-   root.CFrame=CFrame.lookAt(pos,pos+flat); root.AssemblyLinearVelocity=Vector3.zero; a.MotionGrace=now+1
+   root.CFrame=CFrame.lookAt(pos,pos+flat); root.AssemblyLinearVelocity=Vector3.zero
+   C.AntiExploitService:ResetMotion(a,pos)
    if def.Kind=="Dash" then area(pos,def.Damage,nil,35) end
   end
  elseif def.Kind=="Domain" then
@@ -332,7 +392,10 @@ function S:RunOne()
  local index=0
  for _,p in ipairs(players) do
   if p.Parent then
-   index=index+1; local r=roles[p]; local a=C.CharacterService:Spawn(p,r.Role,r.Team,r.Abilities,C.MapService:Spawn(index,r.Team),true)
+   index=index+1; local r=roles[p]; local cf=C.MapService:Spawn(index,r.Team)
+   -- Pathfinding yields; the player can leave while a safe point is being selected.
+   if not p.Parent then continue end
+   local a=C.CharacterService:Spawn(p,r.Role,r.Team,r.Abilities,cf,true)
    C.Remotes.Role:FireClient(p,{Name=a.Definition.DisplayName,Role=a.Role,Team=a.Team,Abilities=a.Abilities,Ultimate=a.Definition.UltimateAbility})
   end
  end
@@ -453,5 +516,22 @@ check("Round transitions reject duplicates and illegal edges",function()
  assert(Round:Transition("Intermission",20));assert(not Round:Transition("Intermission",20))
  local ok=pcall(function() Round:Transition("Results",10) end);assert(not ok)
  for _,s in ipairs({"VotingOrSelection","Loading","Intro","InProgress","SuddenDeath","Results","Cleanup","WaitingForPlayers"}) do assert(Round:Transition(s,1)) end
+end)
+check("Disconnect during yielding spawn search does not create a departed character",function()
+ local leaving={Parent=true}; local staying={Parent=true}; local players={leaving,staying}
+ local spawned,notified=0,0
+ local roles={}
+ for _,p in ipairs(players) do roles[p]={Role="Sorcerer",Team="Sorcerers",Abilities={}} end
+ local c={Config=Config,Maps={{Id="test",Name="test"}},Rng={NextInteger=function() return 1 end},
+  ModeService={Eligible=function() return {"Hunt"} end},RoleService={Assign=function() return roles end},
+  MapService={Load=function() end,Spawn=function(_,index) if index==1 then leaving.Parent=nil end; return "safe" end},
+  CharacterService={Spawn=function(_,p,role,team,abilities,cf)
+   assert(p==staying and p.Parent and cf=="safe"); spawned=spawned+1
+   return {Role=role,Team=team,Abilities=abilities,Definition={DisplayName="test"}}
+  end},Remotes={Role={FireClient=function(_,p) assert(p==staying); notified=notified+1 end}}}
+ local round=setmetatable({},{__index=Round}); round:Init(c); round.Closing=false
+ round.EligiblePlayers=function() return players end; round.Broadcast=function() end
+ round.Countdown=function(self) if self.State=="Intro" then self.Closing=true end; return true end
+ round:RunOne(); equal(spawned,1); equal(notified,1)
 end)
 print("BOUNDARY TEST GROUPS PASSED: "..count)

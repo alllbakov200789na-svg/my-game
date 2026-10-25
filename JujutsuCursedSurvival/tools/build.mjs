@@ -1,7 +1,27 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {spawnSync} from 'node:child_process';
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const args=process.argv.slice(2);
+if(args.length===0){
+ const result=spawnSync('rojo',['build','default.project.json','-o','test.rbxl'],{cwd:ROOT,stdio:'inherit'});
+ if(result.error) console.error(result.error.message);
+ process.exit(result.status ?? 1);
+}
+if(args.length!==3 || args[0]!=='--regenerate' || args[1]!=='--output'){
+ console.error('Usage: node tools/build.mjs [--regenerate --output work/generated/NEW-NAME]');
+ process.exit(1);
+}
+// Legacy procedural drafts are opt-in and can NEVER overwrite authored assets/project files.
+const generatedRoot=path.join(ROOT,'work','generated');
+const output=path.resolve(ROOT,args[2]);
+if(path.dirname(output)!==generatedRoot || fs.existsSync(output)){
+ throw new Error('Regeneration requires a NEW direct child of work/generated. Existing paths are refused.');
+}
+fs.mkdirSync(generatedRoot,{recursive:true});
+if(fs.realpathSync(generatedRoot)!==generatedRoot) throw new Error('Redirected generation directory is not allowed');
+fs.mkdirSync(output);
 const esc=s=>String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
 let serial=0;
 const prop=(type,name,value)=>`<${type} name="${name}">${value}</${type}>`;
@@ -142,28 +162,7 @@ function lobby(){
  const spawn=part('LobbySpawn',[0,1,375],[8,1,8],C.violet,288,{class:'SpawnLocation',alpha:.5});spawn.props+=bool('Neutral',true)+num('Duration',0);add(root,spawn);
  return root;
 }
-function scripts(dir){return fs.readdirSync(dir,{withFileTypes:true}).sort((a,b)=>a.name.localeCompare(b.name)).map(e=>{
- const p=path.join(dir,e.name);if(e.isDirectory())return folder(e.name,scripts(p));
- if(!e.name.endsWith('.lua'))return null;
- const cls=e.name.endsWith('.server.lua')?'Script':e.name.endsWith('.client.lua')?'LocalScript':'ModuleScript';
- return item(cls,e.name.replace(/\.(server|client)\.lua$|\.lua$/,''),prop('ProtectedString','Source',esc(fs.readFileSync(p,'utf8').replace(/^\uFEFF/,''))));
- }).filter(Boolean);}
+// These drafts are references only. Import selected changes deliberately after review.
 const maps=[city(),academy(),district()],lob=lobby();
-for(const m of maps) fs.writeFileSync(path.join(ROOT,'assets','Maps',m.name+'.rbxmx'),file([m]));
-fs.writeFileSync(path.join(ROOT,'assets','Lobby.rbxmx'),file([lob]));
-const lighting=item('Lighting','Lighting',num('ClockTime',19.3)+num('Brightness',2.2)+col('Ambient',[94,85,135])+col('OutdoorAmbient',[100,110,148])+bool('GlobalShadows',true),[
- item('BloomEffect','AnimeBloom',num('Intensity',.25)+num('Size',24)+num('Threshold',1.4)),
- item('ColorCorrectionEffect','AnimeGrade',num('Contrast',.12)+num('Saturation',.13)+col('TintColor',[239,235,255])),
- item('Atmosphere','CityHaze',num('Density',.22)+num('Offset',.1)+col('Color',[160,153,200])+col('Decay',[88,77,115])+num('Haze',1.3)),
-]);
-const objects=[item('Workspace','Workspace',bool('StreamingEnabled',false)+num('Gravity',196.2),[lob,folder('GameplayEffects'),folder('SpawnPoints')]),
- item('ReplicatedStorage','ReplicatedStorage','',[folder('Shared',scripts(path.join(ROOT,'src','Shared'))),folder('SharedAssets')]),
- item('ServerScriptService','ServerScriptService','',scripts(path.join(ROOT,'src','Server'))),
- item('ServerStorage','ServerStorage','',[folder('Maps',maps),folder('NPCs'),folder('ServerAssets')]),
- item('StarterPlayer','StarterPlayer','',[item('StarterPlayerScripts','StarterPlayerScripts','',scripts(path.join(ROOT,'src','Client')))]),
- item('StarterGui','StarterGui'),lighting];
-fs.writeFileSync(path.join(ROOT,'JujutsuCursedSurvival.rbxlx'),file(objects));
-const project={name:'JujutsuCursedSurvival',tree:{$className:'DataModel',ReplicatedStorage:{Shared:{$path:'src/Shared'},SharedAssets:{$className:'Folder'}},ServerScriptService:{$path:'src/Server'},ServerStorage:{Maps:{$path:'assets/Maps'},ServerAssets:{$className:'Folder'},NPCs:{$className:'Folder'}},StarterPlayer:{StarterPlayerScripts:{$path:'src/Client'}},Workspace:{$properties:{StreamingEnabled:false},Lobby:{$path:'assets/Lobby.rbxmx'},GameplayEffects:{$className:'Folder'},SpawnPoints:{$className:'Folder'}},Lighting:{$properties:{ClockTime:19.3,Brightness:2.2,Ambient:[.368,.333,.529],OutdoorAmbient:[.392,.431,.58]},AnimeBloom:{$className:'BloomEffect',$properties:{Intensity:.25,Size:24,Threshold:1.4}},AnimeGrade:{$className:'ColorCorrectionEffect',$properties:{Contrast:.12,Saturation:.13}}}}};
-fs.writeFileSync(path.join(ROOT,'default.project.json'),JSON.stringify(project,null,2));
-function count(o){return 1+o.children.reduce((a,c)=>a+count(c),0)}
-console.log(JSON.stringify({place:'JujutsuCursedSurvival.rbxlx',maps:maps.map(m=>({name:m.name,instances:count(m)})),lobby:count(lob),totalInstances:objects.reduce((a,c)=>a+count(c),0)},null,2));
+for(const model of [...maps,lob]) fs.writeFileSync(path.join(output,model.name+'.rbxmx'),file([model]),{flag:'wx'});
+console.log('Draft models written to '+path.relative(ROOT,output)+'. Authored assets and default.project.json were not modified.');

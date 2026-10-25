@@ -1,0 +1,186 @@
+﻿[
+    {
+        "Path":  "src/Client/CameraController.lua",
+        "SHA256":  "6F43055B87EC8BAEE8611F01C3FB57378A134E83C92B92DC8FC418C5F349941B"
+    },
+    {
+        "Path":  "src/Client/ClientBootstrap.client.lua",
+        "SHA256":  "1EAD12DD02FACB39F13D8509352CE2CC84DA86DAA452625880053C48D486ABBB"
+    },
+    {
+        "Path":  "src/Client/CombatController.lua",
+        "SHA256":  "1DCAE8A0360F24D0E5C400C2AA8F668AA5F434F3EA533A59AC419FD2C51D919E"
+    },
+    {
+        "Path":  "src/Client/InputController.lua",
+        "SHA256":  "B785FF4C38C971A3B34D3688BEAC7FF3AAC8587331C22CFA0026299C644C1929"
+    },
+    {
+        "Path":  "src/Client/SoundController.lua",
+        "SHA256":  "B00E45AC7CD162041AF6CFE47521084D85776EB8B6522FA2CCC9F608EEE5BF87"
+    },
+    {
+        "Path":  "src/Client/SpectatorController.lua",
+        "SHA256":  "2E4ADA487D94F99590D6F5CF21B27C670D1DEECE7CBEB632F174E84274C0CF8F"
+    },
+    {
+        "Path":  "src/Client/UIController.lua",
+        "SHA256":  "9E711E33CBB52C7D4D2479943DBF4E3C5FCEDF848840522D530F62358E0A7A4A"
+    },
+    {
+        "Path":  "src/Client/VFXController.lua",
+        "SHA256":  "A2039E8586D016DBF2B5BCEDBB63B5978E4E8E2EF3C6908F432C1544125B402B"
+    },
+    {
+        "Path":  "src/Server/Bootstrap.server.lua",
+        "SHA256":  "31FD2BA99E9ECABCBDF060FDCB79B96E1EDB2A7C6C6D90C74E0F453107523817"
+    },
+    {
+        "Path":  "src/Server/Services/AbilityService.lua",
+        "SHA256":  "388CCF362A7552AAEE297F55D8CAB553DDF4C0CCB1FE8830C94762B59FBC7FB2"
+    },
+    {
+        "Path":  "src/Server/Services/AntiExploitService.lua",
+        "SHA256":  "DDDEC6CF21F1577194173574C46CAD6DADDD607F246B229177B45D5266903293"
+    },
+    {
+        "Path":  "src/Server/Services/CharacterService.lua",
+        "SHA256":  "A810EF8FE55C3CA9B9FB99B6EE99255E559471AD13A4BE357C2E171F48C933EE"
+    },
+    {
+        "Path":  "src/Server/Services/CombatService.lua",
+        "SHA256":  "ED2651AF624B501028D68A41E4E01962E7F5DAC523EAD97CB78DBCCA4190633E"
+    },
+    {
+        "Path":  "src/Server/Services/DamageService.lua",
+        "SHA256":  "3DB34C4D3071719656850BD48A906C8AB50BFA086BF092E48CBCBF05EE06F9C0"
+    },
+    {
+        "Path":  "src/Server/Services/DestructionService.lua",
+        "SHA256":  "0AAB3F4DBD4C8180EDE8E9061F29AFF652BC7E0137273B2514FA454B4BE5DF5C"
+    },
+    {
+        "Path":  "src/Server/Services/MapService.lua",
+        "SHA256":  "5CA51F1015AE4EE579D4875C2C2BA3457EC9D6ECC1BFF37F8C5AB5EB82A2A12A"
+    },
+    {
+        "Path":  "src/Server/Services/ModeService.lua",
+        "SHA256":  "44C3897D2C033C50B4A38C9CD97C658C45761108FCCE17E49B6F28ACCB05E05C"
+    },
+    {
+        "Path":  "src/Server/Services/MonetizationService.lua",
+        "SHA256":  "17A7063CEB3A47F09B1CF322690BE2C264EDBA791D8413B6EAA229BEFE9C669D"
+    },
+    {
+        "Path":  "src/Server/Services/NPCService.lua",
+        "SHA256":  "591A84CCB8316444AC9189C4DEBA427C4DC56B5D469A7AA9C16EC9DAA2DE8547"
+    },
+    {
+        "Path":  "src/Server/Services/PlayerDataService.lua",
+        "SHA256":  "F4A6068CC1925D9B371266B9A48880D1C93A6C12858D99F80EF6582B459E6F29"
+    },
+    {
+        "Path":  "src/Server/Services/QuestService.lua",
+        "SHA256":  "73CE01E90013B3466993B2761851618F35886B9B6F0B619A84F7012B09EBA4BD"
+    },
+    {
+        "Path":  "src/Server/Services/RewardService.lua",
+        "SHA256":  "C7B0ED581F31F77A7A68437C6135965AFCA678F83FD2CE4827BFFB4639240F88"
+    },
+    {
+        "Path":  "src/Server/Services/RoleService.lua",
+        "SHA256":  "75123A66FA7C8D81CE03C2A35E86BD9EB1C9E9966345A38DC34C0A54EDEA318F"
+    },
+    {
+        "Path":  "src/Server/Services/RoundService.lua",
+        "SHA256":  "3B2918684CD5BA5D775F67C56C3DA8BD9A80738A6B03E9CF32F2D82A14AB4436"
+    },
+    {
+        "Path":  "src/Server/Services/SpawnSafety.lua",
+        "SHA256":  "BCF187F12C5F3CD1D23DDB51C545F28E92EA6C63D698E481FF74AE1A6CE074C5"
+    },
+    {
+        "Path":  "src/Server/Services/VerticalMotion.lua",
+        "SHA256":  "6A8176B65874B92CDA0064F3E96574AE7B76BDD6CCE9A5CA4363F0206FED509B"
+    },
+    {
+        "Path":  "src/Shared/AbilityDefinitions.lua",
+        "SHA256":  "1C81333308E9D666EBD373CC2749AB2CA82292BF51BAC8FF873FB793368CECB0"
+    },
+    {
+        "Path":  "src/Shared/CharacterDefinitions.lua",
+        "SHA256":  "EE1A3F249FA6552311CDFDD8D1FFCA3EE60B564855E1963EF316F66AE94F8E08"
+    },
+    {
+        "Path":  "src/Shared/Config.lua",
+        "SHA256":  "A3F67030AA09D5A3D266CD2D50387BC264B84EB1A937E900D137F9DC8807B5CE"
+    },
+    {
+        "Path":  "src/Shared/MapDefinitions.lua",
+        "SHA256":  "00C750E0BB3E97F3DAA2B2C9E0D5E0C2FF17E122EC47EFDBC1A3C1B3932E02BB"
+    },
+    {
+        "Path":  "src/Shared/RoundDefinitions.lua",
+        "SHA256":  "CDF996356A0C0AEE27531E822CABA2969A630D05BAB0160A9F4911547B3AB799"
+    },
+    {
+        "Path":  "src/Shared/Types.lua",
+        "SHA256":  "13F28D9816FA9F01F232384D4417683675C22DA561C475C4BA01F60475C80A39"
+    },
+    {
+        "Path":  "src/Shared/Utility.lua",
+        "SHA256":  "6B0BB06FAB0F86E2291AA091BCA1FD014609C84E7D75D06191CD23386CE7C959"
+    },
+    {
+        "Path":  "assets/Lobby.backup.rbxmx",
+        "SHA256":  "CE6A8A0405C94FF9DB8C65F82A5C76BD3C095899AEAD6A64A2EC0505E35B1131"
+    },
+    {
+        "Path":  "assets/Lobby.rbxmx",
+        "SHA256":  "154981965E3784B532937E211EFBA24D30A6E48D44195DB8E1AC1B9D773575D1"
+    },
+    {
+        "Path":  "assets/Audio/cast.wav",
+        "SHA256":  "6587D8D1245F46F444E68293437C8FCBC0397D26EFD1FFCAD94AC6E89C1A1E2E"
+    },
+    {
+        "Path":  "assets/Audio/domain.wav",
+        "SHA256":  "63FF847C35E4A083FBE6187FEAB15DF2C22F9E72AA176B039522805B5ADA5EDE"
+    },
+    {
+        "Path":  "assets/Audio/impact.wav",
+        "SHA256":  "D59C3FA2E5D73BF4421540316E4D0EA804EFCC234A77EA33A2911C5BBC91AE0E"
+    },
+    {
+        "Path":  "assets/Audio/seal.wav",
+        "SHA256":  "B0E9BD4BA3D3DF14BD6C63BB79FE062C2EE068314CEEF574003F9220F2A83520"
+    },
+    {
+        "Path":  "assets/Audio/warning.wav",
+        "SHA256":  "FCF28826B8EE75EB07FABCDCCBE1C9C4A6E37201879B93981AA73D6F61D7BE54"
+    },
+    {
+        "Path":  "assets/Maps/CursedDistrict.rbxmx",
+        "SHA256":  "5356C2A577F5FD5C775006E4B95F7EADAB0650DE276F78FAF869A65BA3CE6C02"
+    },
+    {
+        "Path":  "assets/Maps/ShibuyaCity.rbxmx",
+        "SHA256":  "A1486A816B4692B546CBE14191ED91064D17A14CA45B4D7DD5D15C52D048626B"
+    },
+    {
+        "Path":  "assets/Maps/SorcererAcademy.rbxmx",
+        "SHA256":  "1FE92A8D38EE21B5B4F2149D11E09DE261237EA38B787291FD8722B8894FAE64"
+    },
+    {
+        "Path":  "default.project.json",
+        "SHA256":  "DC8BE53762F4D57E5082EA8A496517302CC2F5C817954428792E6BB924C510EF"
+    },
+    {
+        "Path":  "tools/build.mjs",
+        "SHA256":  "3B35963821560BADAFECD19BA1068B3A33717115DB27E0F6EF5E62FD64E41B46"
+    },
+    {
+        "Path":  "tools/verify.ps1",
+        "SHA256":  "B713D6206675C329A4AEBCE6A6A70CE527BF8E4049367402503708AF68E0F40D"
+    }
+]

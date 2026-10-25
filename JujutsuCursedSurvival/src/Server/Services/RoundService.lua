@@ -69,7 +69,10 @@ function S:RunOne()
  local index=0
  for _,p in ipairs(players) do
   if p.Parent then
-   index=index+1; local r=roles[p]; local a=C.CharacterService:Spawn(p,r.Role,r.Team,r.Abilities,C.MapService:Spawn(index,r.Team),true)
+   index=index+1; local r=roles[p]; local cf=C.MapService:Spawn(index,r.Team)
+   -- Pathfinding yields; the player can leave while a safe point is being selected.
+   if not p.Parent then continue end
+   local a=C.CharacterService:Spawn(p,r.Role,r.Team,r.Abilities,cf,true)
    C.Remotes.Role:FireClient(p,{Name=a.Definition.DisplayName,Role=a.Role,Team=a.Team,Abilities=a.Abilities,Ultimate=a.Definition.UltimateAbility})
   end
  end

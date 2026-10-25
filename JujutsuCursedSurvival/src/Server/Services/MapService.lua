@@ -1,4 +1,5 @@
 local SS=game:GetService("ServerStorage")
+local SpawnSafety=require(script.Parent.SpawnSafety)
 local S={}
 function S:Init(ctx) self.C=ctx; self.Connections={}; self.Seals=0; self.Holds={} end
 function S:Load(id,mode)
@@ -14,6 +15,9 @@ function S:Load(id,mode)
   arena.CFrame=CFrame.new(0,0.5,0)*CFrame.Angles(0,0,math.pi/2); arena.Anchored=true; arena.Material=Enum.Material.Marble; arena.Color=Color3.fromRGB(55,51,85); arena.Parent=self.Active
  end
  local objs=self.Active:FindFirstChild("Objectives")
+ -- Validate once during Loading, before any player is moved out of the lobby.
+ self.SpawnSafety=SpawnSafety.new(self.Active,self.C.Config.ArenaRadius)
+ SpawnSafety.CheckObjectives(self.SpawnSafety,objs)
  for i,p in ipairs(objs:GetChildren()) do
   p:SetAttribute("Activated",false)
   local prompt=Instance.new("ProximityPrompt"); prompt.Name="SealPrompt"; prompt.ActionText="Активировать"; prompt.ObjectText="Печать "..i
@@ -48,12 +52,29 @@ function S:Load(id,mode)
  end
 end
 function S:Spawn(index,team)
- if self.Mode=="Clash" then return CFrame.new((team=="Curses" and 1 or -1)*27,5,(index-1)*5-15) end
+ assert(self.SpawnSafety,"Map must be validated before spawning")
+ if self.Mode=="Clash" then
+  local cf=SpawnSafety.Find(self.SpawnSafety,CFrame.new((team=="Curses" and 1 or -1)*27,5,(index-1)*5-15))
+  if cf then return cf end
+ end
  local folder=self.Active and self.Active:FindFirstChild("SpawnPoints")
  local list=folder and folder:GetChildren() or {}; table.sort(list,function(a,b) return a.Name<b.Name end)
- if #list==0 then return CFrame.new(0,8,0) end
+ assert(#list>0,"Map has no spawn points")
  local offset=team=="Curses" and math.floor(#list/2) or 0
- return list[((index-1+offset)%#list)+1].CFrame+Vector3.new(0,4,0)
+ for retry=0,#list-1 do
+  local point=list[((index-1+offset+retry)%#list)+1]
+  if point:IsA("BasePart") then
+   local requested=point.CFrame+Vector3.new(0,4,0)
+   local cf=SpawnSafety.Find(self.SpawnSafety,requested)
+   if cf then
+    if retry>0 or Vector3.new(cf.X-requested.X,0,cf.Z-requested.Z).Magnitude>1 then
+     warn("[Spawn] Safe alternative",self.Active.Name,point.Name,team,cf.Position)
+    end
+    return cf
+   end
+  end
+ end
+ error("No safe unoccupied spawn with a route to objectives on "..self.Active.Name)
 end
 function S:Step(dt)
  for p,hold in pairs(self.Holds) do
@@ -68,6 +89,7 @@ end
 function S:Cleanup()
  for _,c in ipairs(self.Connections) do c:Disconnect() end; self.Connections={}; self.Holds={}
  if self.Active then self.Active:Destroy(); self.Active=nil end
+ self.SpawnSafety=nil
  self.Seals=0
 end
 return S

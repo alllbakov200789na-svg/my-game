@@ -56,7 +56,10 @@ function S:Cast(p,id,direction)
   if def.Kind=="Pull" then
    for _,b in ipairs(C.CombatService:Targets(a,def.Range+def.Radius)) do
     local br=C.U.root(b.Model); local delta=center-br.Position
-    if delta.Magnitude<def.Radius and delta.Magnitude>1 and C.CombatService:Visible(center,b,{a.Model}) then br.AssemblyLinearVelocity=delta.Unit*48; b.MotionGrace=now+1 end
+    if delta.Magnitude<def.Radius and delta.Magnitude>1 and C.CombatService:Visible(center,b,{a.Model}) then
+     local velocity=delta.Unit*48; C.AntiExploitService:AuthorizeImpulse(b,velocity,1)
+     br.AssemblyLinearVelocity=velocity
+    end
    end
   end
   C.Remotes.Effect:FireAllClients("Burst",center,def.Color,def.Radius)
@@ -78,7 +81,8 @@ function S:Cast(p,id,direction)
   local pos=origin+flat*length; local ground=C.CombatService:Ray(pos+Vector3.new(0,3,0),Vector3.new(0,-16,0),{a.Model})
   if ground and math.abs(pos.X)<C.Config.ArenaRadius and math.abs(pos.Z)<C.Config.ArenaRadius then
    pos=Vector3.new(pos.X,ground.Position.Y+3.2,pos.Z)
-   root.CFrame=CFrame.lookAt(pos,pos+flat); root.AssemblyLinearVelocity=Vector3.zero; a.MotionGrace=now+1
+   root.CFrame=CFrame.lookAt(pos,pos+flat); root.AssemblyLinearVelocity=Vector3.zero
+   C.AntiExploitService:ResetMotion(a,pos)
    if def.Kind=="Dash" then area(pos,def.Damage,nil,35) end
   end
  elseif def.Kind=="Domain" then

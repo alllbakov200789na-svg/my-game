@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
-const src=n=>fs.readFileSync(path.join(root,'src/Server/Services',n+'.lua'),'utf8').replace(/^\uFEFF/,'');
+const src=n=>fs.readFileSync(path.join(root,'src/Server/Services',n+'.lua'),'utf8').replace(/^\uFEFF/,'').replace('require(script.Parent.VerticalMotion)','require("../src/Server/Services/VerticalMotion")');
 const head=`local U=require("../src/Shared/Utility")
 local Config=require("../src/Shared/Config")
 local A=require("../src/Shared/AbilityDefinitions")
@@ -96,8 +96,28 @@ check("Round transitions reject duplicates and illegal edges",function()
  local ok=pcall(function() Round:Transition("Results",10) end);assert(not ok)
  for _,s in ipairs({"VotingOrSelection","Loading","Intro","InProgress","SuddenDeath","Results","Cleanup","WaitingForPlayers"}) do assert(Round:Transition(s,1)) end
 end)
+check("Disconnect during yielding spawn search does not create a departed character",function()
+ local leaving={Parent=true}; local staying={Parent=true}; local players={leaving,staying}
+ local spawned,notified=0,0
+ local roles={}
+ for _,p in ipairs(players) do roles[p]={Role="Sorcerer",Team="Sorcerers",Abilities={}} end
+ local c={Config=Config,Maps={{Id="test",Name="test"}},Rng={NextInteger=function() return 1 end},
+  ModeService={Eligible=function() return {"Hunt"} end},RoleService={Assign=function() return roles end},
+  MapService={Load=function() end,Spawn=function(_,index) if index==1 then leaving.Parent=nil end; return "safe" end},
+  CharacterService={Spawn=function(_,p,role,team,abilities,cf)
+   assert(p==staying and p.Parent and cf=="safe"); spawned=spawned+1
+   return {Role=role,Team=team,Abilities=abilities,Definition={DisplayName="test"}}
+  end},Remotes={Role={FireClient=function(_,p) assert(p==staying); notified=notified+1 end}}}
+ local round=setmetatable({},{__index=Round}); round:Init(c); round.Closing=false
+ round.EligiblePlayers=function() return players end; round.Broadcast=function() end
+ round.Countdown=function(self) if self.State=="Intro" then self.Closing=true end; return true end
+ round:RunOne(); equal(spawned,1); equal(notified,1)
+end)
 print("BOUNDARY TEST GROUPS PASSED: "..count)
 `;
 const modules=[['Data','PlayerDataService'],['Guard','AntiExploitService'],['Ability','AbilityService'],['Round','RoundService']].map(([name,n])=>`local ${name}=(function()\n${src(n)}\nend)()\n`).join('');
 fs.writeFileSync(path.join(root,'tests','boundaries.generated.lua'),head+modules+body);
 console.log('Generated engine-boundary tests with explicit test doubles; not a Roblox Engine test.');
+const movement=fs.readFileSync(path.join(root,'tests','movement.spec.lua'),'utf8');
+const movementModules=[['Guard','AntiExploitService'],['Ability','AbilityService'],['Damage','DamageService']].map(([name,n])=>`local ${name}=(function()\n${src(n)}\nend)()\n`).join('');
+fs.writeFileSync(path.join(root,'tests','movement.generated.lua'),movement.replace('-- INJECT SERVER MODULES',movementModules));

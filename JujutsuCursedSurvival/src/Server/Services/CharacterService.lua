@@ -62,8 +62,8 @@ function S:Spawn(p,role,team,abilities,cf,participant)
  local root=C.U.root(model); if root then root:SetNetworkOwner(p) end
  local a={Model=model,Player=p,Role=role,Team=team,Definition=d,Alive=true,Participant=participant,Energy=d.Energy,
  Stamina=d.Stamina,Ultimate=0,Abilities=abilities,Cooldowns={},Actions=0,ActiveSeconds=0,Damage=0,Healed=0,
- UsedAbilities={},Eliminations=0,MotionGrace=os.clock()+3,SpawnAt=os.clock(),ShieldUntil=0,StunUntil=0}
- self.Actors[model]=a; self.ByPlayer[p]=a; C.AntiExploitService.Motion[p]=nil; p:SetAttribute("Spectator",not participant)
+ UsedAbilities={},Eliminations=0,SpawnAt=os.clock(),ShieldUntil=0,StunUntil=0}
+ self.Actors[model]=a; self.ByPlayer[p]=a; if root then C.AntiExploitService:ResetMotion(a,root.Position) end; p:SetAttribute("Spectator",not participant)
  a.Connection=h.Died:Connect(function() self:Die(a) end)
  self:Cosmetic(p)
  local profile=C.PlayerDataService:Get(p)
@@ -110,7 +110,6 @@ function S:Transform(p)
  local pos=a.Model:GetPivot()
  local b=self:Spawn(p,"Sukuna","Curses",table.clone(self.C.Characters.Sukuna.AbilitySet),pos,true)
  for _,key in ipairs({"Actions","ActiveSeconds","Damage","Healed","UsedAbilities","Eliminations","Objectives"}) do b[key]=a[key] end
- self.C.AntiExploitService.Motion[p]=nil
  return true
 end
 function S:Step(dt)
@@ -128,8 +127,9 @@ function S:Step(dt)
       a.Stamina=math.max(0,a.Stamina-C.Config.SprintDrain*dt); h.WalkSpeed=a.Definition.SprintSpeed
      else a.Stamina=math.min(100,a.Stamina+C.Config.StaminaRegen*dt); h.WalkSpeed=a.Definition.WalkSpeed end
      if os.clock()<a.StunUntil then h.WalkSpeed=0; h.Jump=false end
-     C.AntiExploitService:Step(a,dt)
     end
+    -- Keep a continuous baseline during Intro as well as combat.
+    if a.Participant then C.AntiExploitService:Step(a,dt) end
    end
   end
  end

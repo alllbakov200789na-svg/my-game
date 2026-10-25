@@ -1,12 +1,12 @@
 local RS=game:GetService("ReplicatedStorage")
 local Players=game:GetService("Players")
 local shared=RS:WaitForChild("Shared")
-local C={Player=Players.LocalPlayer,Config=require(shared.Config),Abilities=require(shared.AbilityDefinitions),
- Characters=require(shared.CharacterDefinitions),U=require(shared.Utility),Remotes={},Settings={LowFX=false,Shake=true,ReducedFlash=false,Scares=true,Sound=true}}
+local C={Player=Players.LocalPlayer,Config=require(shared:WaitForChild("Config")),Abilities=require(shared:WaitForChild("AbilityDefinitions")),
+ Characters=require(shared:WaitForChild("CharacterDefinitions")),U=require(shared:WaitForChild("Utility")),Remotes={},Settings={LowFX=false,Shake=true,ReducedFlash=false,Scares=true,Sound=true}}
 local folder=RS:WaitForChild("Remotes")
 for _,name in ipairs({"Cast","Sprint","Action","State","Vitals","Effect","Role","Results","Profile","Notice"}) do C.Remotes[name]=folder:WaitForChild(name) end
 local names={"SoundController","VFXController","CameraController","SpectatorController","UIController","CombatController","InputController"}
-for _,name in ipairs(names) do C[name]=require(script.Parent[name]) end
+for _,name in ipairs(names) do C[name]=require(script.Parent:WaitForChild(name)) end
 for _,name in ipairs(names) do C[name]:Init(C) end
 C.Remotes.State.OnClientEvent:Connect(function(s) C.State=s; C.UIController:State(s); C.SpectatorController:Update() end)
 C.Remotes.Vitals.OnClientEvent:Connect(function(v) C.Vitals=v; C.UIController:Vitals(v) end)

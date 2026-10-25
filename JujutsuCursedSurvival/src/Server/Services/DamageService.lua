@@ -17,7 +17,8 @@ function S:Apply(attacker,target,amount,origin,knock)
  if attacker.Player then C.QuestService:Progress(attacker.Player,"Damage",math.floor(damage)) end
  if knock and origin then
   local v=root.Position-origin; if v.Magnitude>0.1 then
-   root.AssemblyLinearVelocity=v.Unit*knock+Vector3.new(0,12,0); target.MotionGrace=os.clock()+1.3
+   local velocity=v.Unit*knock+Vector3.new(0,12,0)
+   C.AntiExploitService:AuthorizeImpulse(target,velocity,1.3); root.AssemblyLinearVelocity=velocity
   end
  end
  C.Remotes.Effect:FireAllClients("Hit",root.Position,{255,240,220},3,target.Model)
