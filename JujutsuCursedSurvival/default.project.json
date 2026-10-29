@@ -18,7 +18,19 @@
     },
     "ServerStorage": {
       "Maps": {
-        "$path": "assets/Maps"
+        "$className": "Folder",
+        "ShibuyaCity": {
+          "$path": "assets/ShibuyaPrepared.rbxm"
+        },
+        "CursedDistrict": {
+          "$path": "assets/Maps/CursedDistrict.rbxmx"
+        },
+        "CursedDistrict.before-overhaul": {
+          "$path": "assets/Maps/CursedDistrict.before-overhaul.rbxmx"
+        },
+        "SorcererAcademy": {
+          "$path": "assets/Maps/SorcererAcademy.rbxmx"
+        }
       },
       "ServerAssets": {
         "$className": "Folder"

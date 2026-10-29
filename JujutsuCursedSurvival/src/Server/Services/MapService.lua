@@ -1,5 +1,6 @@
 local SS=game:GetService("ServerStorage")
 local SpawnSafety=require(script.Parent.SpawnSafety)
+local ShibuyaLighting=require(script.Parent.ShibuyaLighting)
 local S={}
 function S:Init(ctx) self.C=ctx; self.Connections={}; self.Seals=0; self.Holds={} end
 function S:Load(id,mode)
@@ -50,6 +51,7 @@ function S:Load(id,mode)
    prompt.Enabled=false; p.Transparency=1; a.Energy=math.min(100,a.Energy+35)
   end)
  end
+ if id=="ShibuyaCity" then self.MapLighting=ShibuyaLighting.Apply(self.Active) end
 end
 function S:Spawn(index,team)
  assert(self.SpawnSafety,"Map must be validated before spawning")
@@ -87,6 +89,7 @@ function S:Step(dt)
  end
 end
 function S:Cleanup()
+ if self.MapLighting then self.MapLighting:Destroy(); self.MapLighting=nil end
  for _,c in ipairs(self.Connections) do c:Disconnect() end; self.Connections={}; self.Holds={}
  if self.Active then self.Active:Destroy(); self.Active=nil end
  self.SpawnSafety=nil
